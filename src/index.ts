@@ -17,6 +17,12 @@ const ReactNativeMLStableDiffusion = NativeModules.ReactNativeMLStableDiffusion
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return ReactNativeMLStableDiffusion.multiply(a, b);
+export async function generateImage(): Promise<any> {
+  console.log(
+    ReactNativeMLStableDiffusion.generateImage({})
+      .then(console.log)
+      .catch(console.log)
+  );
+
+  return ReactNativeMLStableDiffusion;
 }
