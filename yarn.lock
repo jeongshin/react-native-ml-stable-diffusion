@@ -4049,6 +4049,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base-64@npm:0.1.0":
+  version: 0.1.0
+  resolution: "base-64@npm:0.1.0"
+  checksum: 5a42938f82372ab5392cbacc85a5a78115cbbd9dbef9f7540fa47d78763a3a8bd7d598475f0d92341f66285afd377509851a9bb5c67bbecb89686e9255d5b3eb
+  languageName: node
+  linkType: hard
+
 "base64-js@npm:^1.1.2, base64-js@npm:^1.3.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
@@ -6708,7 +6715,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^7.0.0, glob@npm:^7.1.3, glob@npm:^7.1.4":
+"glob@npm:^7.0.0, glob@npm:^7.1.3, glob@npm:^7.1.4, glob@npm:^7.2.3":
   version: 7.2.3
   resolution: "glob@npm:7.2.3"
   dependencies:
@@ -10858,6 +10865,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-blob-util@npm:^0.19.2":
+  version: 0.19.2
+  resolution: "react-native-blob-util@npm:0.19.2"
+  dependencies:
+    base-64: 0.1.0
+    glob: ^7.2.3
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 0785726be05488e2573953808bf19a5a96b6e1fdfb79311f0466a090f0a02efadc863314cc960fc829ff77d0ffbbb074710209ef5d2f7d89e5e63092e9c5cca0
+  languageName: node
+  linkType: hard
+
 "react-native-builder-bob@npm:^0.23.0":
   version: 0.23.0
   resolution: "react-native-builder-bob@npm:0.23.0"
@@ -10887,6 +10907,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-device-info@npm:^10.11.0":
+  version: 10.11.0
+  resolution: "react-native-device-info@npm:10.11.0"
+  peerDependencies:
+    react-native: "*"
+  checksum: 3f2de34df4e95e87291673fe69b09d3b96f9088177a8dadd92eccec86549cea63ca08ab82f120d4150eb0302ac721ad8a5e4b3a8136c9f54f0212e4c055762b0
+  languageName: node
+  linkType: hard
+
 "react-native-ml-stable-diffusion-example@workspace:example":
   version: 0.0.0-use.local
   resolution: "react-native-ml-stable-diffusion-example@workspace:example"
@@ -10900,6 +10929,7 @@ __metadata:
     pod-install: ^0.1.0
     react: 18.2.0
     react-native: 0.72.5
+    react-native-blob-util: ^0.19.2
   languageName: unknown
   linkType: soft
 
@@ -10925,6 +10955,7 @@ __metadata:
     react: 18.2.0
     react-native: 0.72.5
     react-native-builder-bob: ^0.23.0
+    react-native-device-info: ^10.11.0
     release-it: ^15.0.0
     turbo: ^1.10.7
     typescript: ^5.0.2
