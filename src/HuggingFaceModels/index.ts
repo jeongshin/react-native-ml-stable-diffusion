@@ -41,7 +41,7 @@ export interface IDiffusionModelInfo {
 
 export class HuggingFaceModelInfo {
   /// Hugging Face model Id that contains .zip archives with compiled Core ML models
-  private _id: string;
+  public id: string;
 
   private _version: string;
 
@@ -57,7 +57,7 @@ export class HuggingFaceModelInfo {
   private _isXL: boolean;
 
   constructor(info: IDiffusionModelInfo) {
-    this._id = info.modelId;
+    this.id = info.modelId;
     this._version = info.modelVersion;
     this._isXL = info.isXL || false;
     this._quantized = info.quantized || false;
@@ -85,11 +85,11 @@ export class HuggingFaceModelInfo {
    * @returns {boolean} true if the model is supported on the current device
    */
   public isSupported(): boolean {
-    return !!supportedModels().find((m) => m._id === this._id);
+    return !!supportedModels().find((m) => m.id === this.id);
   }
 
   public modelUrl(variant: AttentionVariant): string {
-    const repo = this._id.split('/').pop() ?? '';
+    const repo = this.id.split('/').pop() ?? '';
 
     let suffix: string;
 
@@ -105,7 +105,7 @@ export class HuggingFaceModelInfo {
         break;
     }
 
-    return `https://huggingface.co/${this._id}/resolve/main/${repo}_${suffix}.zip`;
+    return `https://huggingface.co/${this.id}/resolve/main/${repo}_${suffix}.zip`;
   }
 
   /**

@@ -1,5 +1,5 @@
-import ReactNativeStableDiffusion from './ReactNativeMLStableDiffusion';
+import StableDiffusion from './ReactNativeMLStableDiffusion';
 
 export * from './HuggingFaceModels';
 
-export { ReactNativeStableDiffusion };
+export { StableDiffusion };
