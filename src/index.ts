@@ -18,11 +18,5 @@ const ReactNativeMLStableDiffusion = NativeModules.ReactNativeMLStableDiffusion
     );
 
 export async function generateImage(): Promise<any> {
-  console.log(
-    ReactNativeMLStableDiffusion.generateImage({})
-      .then(console.log)
-      .catch(console.log)
-  );
-
   return ReactNativeMLStableDiffusion;
 }
