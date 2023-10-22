@@ -1,3 +1,3 @@
 [submodule "ml-stable-diffusion"]
 	path = ml-stable-diffusion
-	url = https://github.com/apple/ml-stable-diffusion
+	url = https://github.com/jeongshin/ml-stable-diffusion
