@@ -1,11 +1,6 @@
 import { Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 
-export enum ComputeUnits {
-  'cpuAndGPU' = 'cpuAndGPU',
-  'cpuAndNeuralEngine' = 'cpuAndNeuralEngine',
-}
-
 export enum AttentionVariant {
   original = 'original',
   splitEinsum = 'splitEinsum',

@@ -5,39 +5,52 @@ import {
   HuggingFaceDiffusionModel,
   HuggingFaceModelInfo,
   supportedModels,
+  StableDiffusion,
 } from 'react-native-ml-stable-diffusion';
-import RNBlobUtil from 'react-native-blob-util';
+import RNBlobUtil, { type FetchBlobResponse } from 'react-native-blob-util';
 import RNFS from 'react-native-fs';
 
-const getDownloadedModelPath = (model: HuggingFaceModelInfo) => {
-  return `/stable-diffusion/models/${model.id}`;
-};
+// const getDownloadedModelPath = (model: HuggingFaceModelInfo) => {
+//   return `${RNFS.DocumentDirectoryPath}/stable-diffusion/models/${model.id}`;
+// };
 
-const getSaveModelPath = (model: HuggingFaceModelInfo) => {
+function getSaveModelPath(model: HuggingFaceModelInfo) {
   return `${RNFS.DocumentDirectoryPath}/stable-diffusion/models/${model.id}`;
-};
+}
 
 export default function App() {
   const [models] = React.useState(() => supportedModels());
 
-  React.useEffect(() => {
-    const model = HuggingFaceDiffusionModel.v2Palettized;
+  const [result, setResult] = React.useState<null | FetchBlobResponse>(null);
 
-    RNBlobUtil.config({
-      fileCache: true,
-      path: getDownloadedModelPath(model),
-      IOSBackgroundTask: true,
-    })
-      .fetch('GET', model.getBestUrl())
-      .progress((progress, total) => {
-        console.log(progress, total, (Number(progress) / Number(total)) * 100);
-      })
-      .then((result) => {
-        console.log('done');
-        RNFS.moveFile(result.path(), getSaveModelPath(model)).then(() => {
-          console.log('moved');
-        });
-      });
+  React.useEffect(() => {
+    // const model = HuggingFaceDiffusionModel.v2Palettized;
+    // RNFS.readDir(
+    //   '/var/mobile/Containers/Data/Application/406722EF-D9AB-4252-9A7C-15E694D073C1/Documents/stable-diffusion/models/apple'
+    // )
+    //   .then((file) => {
+    //     console.log(file, 'file');
+    //   })
+    //   .catch((error) => {
+    //     console.log(error, 'error');
+    //   });
+    //
+    // RNBlobUtil.config({
+    //   fileCache: true,
+    //   path: getSaveModelPath(model),
+    //   IOSBackgroundTask: true,
+    // })
+    //   .fetch('GET', model.getBestUrl())
+    //   .progress((progress, total) => {
+    //     console.log(progress, total, (Number(progress) / Number(total)) * 100);
+    //   })
+    //   .then((result) => {
+    //     console.log('done', result.path());
+    //     setResult(result);
+    //     // RNFS.moveFile(result.path(), getSaveModelPath(model)).then(() => {
+    //     //   console.log('moved');
+    //     // });
+    //   });
   }, []);
 
   return (
