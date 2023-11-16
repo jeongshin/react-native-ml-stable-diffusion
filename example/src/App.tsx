@@ -1,80 +1,209 @@
-import * as React from 'react';
+import React from 'react';
 
-import { StyleSheet, View, Text } from 'react-native';
 import {
-  HuggingFaceDiffusionModel,
-  HuggingFaceModelInfo,
-  supportedModels,
+  StyleSheet,
+  Text,
+  TextInput,
+  ScrollView,
+  SafeAreaView,
+  Button,
+  Image,
+  useWindowDimensions,
+} from 'react-native';
+import {
   StableDiffusion,
+  HuggingFaceModelInfo,
+  HuggingFaceDiffusionModel,
 } from 'react-native-ml-stable-diffusion';
-import RNBlobUtil, { type FetchBlobResponse } from 'react-native-blob-util';
+import { unzip } from 'react-native-zip-archive';
+import RNBlobUtil from 'react-native-blob-util';
 import RNFS from 'react-native-fs';
 
-// const getDownloadedModelPath = (model: HuggingFaceModelInfo) => {
-//   return `${RNFS.DocumentDirectoryPath}/stable-diffusion/models/${model.id}`;
-// };
+import { ProgressBar } from './components/ProgressBar';
+import Slider from '@react-native-community/slider';
 
-function getSaveModelPath(model: HuggingFaceModelInfo) {
+function getDownloadModelPath(model: HuggingFaceModelInfo) {
   return `${RNFS.DocumentDirectoryPath}/stable-diffusion/models/${model.id}`;
 }
 
+function getUnzippedModelPath(model: HuggingFaceModelInfo) {
+  return `${RNFS.DocumentDirectoryPath}/stable-diffusion/unzipped/${model.id}`;
+}
+
+const model = HuggingFaceDiffusionModel.v21Palettized;
+
 export default function App() {
-  const [models] = React.useState(() => supportedModels());
+  const [prompt, setPrompt] = React.useState('');
 
-  const [result, setResult] = React.useState<null | FetchBlobResponse>(null);
+  const [progress, setProgress] = React.useState(0);
 
-  React.useEffect(() => {
-    // const model = HuggingFaceDiffusionModel.v2Palettized;
-    // RNFS.readDir(
-    //   '/var/mobile/Containers/Data/Application/406722EF-D9AB-4252-9A7C-15E694D073C1/Documents/stable-diffusion/models/apple'
-    // )
-    //   .then((file) => {
-    //     console.log(file, 'file');
-    //   })
-    //   .catch((error) => {
-    //     console.log(error, 'error');
-    //   });
-    //
-    // RNBlobUtil.config({
-    //   fileCache: true,
-    //   path: getSaveModelPath(model),
-    //   IOSBackgroundTask: true,
-    // })
-    //   .fetch('GET', model.getBestUrl())
-    //   .progress((progress, total) => {
-    //     console.log(progress, total, (Number(progress) / Number(total)) * 100);
-    //   })
-    //   .then((result) => {
-    //     console.log('done', result.path());
-    //     setResult(result);
-    //     // RNFS.moveFile(result.path(), getSaveModelPath(model)).then(() => {
-    //     //   console.log('moved');
-    //     // });
-    //   });
+  const [stepCount, setStepCount] = React.useState(0);
+
+  const [modelLoaded, setModelLoaded] = React.useState(false);
+
+  const [seed, setSeed] = React.useState(0);
+
+  const [generatedImage, setGeneratedImage] = React.useState<string | null>(
+    null
+  );
+
+  const [generateProgress, setGenerateProgress] = React.useState(0);
+
+  const submit = async () => {
+    const startAt = Date.now();
+    StableDiffusion.generateImage(prompt, {
+      stepCount,
+      seed,
+      filename: `${prompt}-${Date.now()}`,
+      onStepChange: ({ step: _step, stepCount: _stepCount }) => {
+        setGenerateProgress((_step + 1) / _stepCount);
+      },
+    })
+      .then((result) => {
+        setGeneratedImage(result);
+        console.log('elapsed', Date.now() - startAt);
+      })
+      .catch(console.log);
+  };
+
+  const getCompiledModelPath = React.useCallback(async (path) => {
+    const files = await RNFS.readDir(path);
+    return `${path}/${files[0]?.name}`;
   }, []);
 
+  const { width } = useWindowDimensions();
+
+  React.useEffect(() => {
+    RNBlobUtil.config({
+      fileCache: true,
+      path: getDownloadModelPath(model),
+      IOSBackgroundTask: true,
+    })
+      .fetch('GET', model.getBestUrl())
+      .progress((_progress, _total) => {
+        setProgress(Number(_progress) / Number(_total));
+      })
+      .then(async (result) => {
+        const unzippedPath = await unzip(
+          result.path(),
+          getUnzippedModelPath(model)
+        );
+        await StableDiffusion.loadModel(
+          await getCompiledModelPath(unzippedPath)
+        );
+        setModelLoaded(true);
+      })
+      .catch((e) => {
+        console.log('error', e);
+      });
+  }, [getCompiledModelPath]);
+
   return (
-    <View style={styles.container}>
-      <View>
-        {models.map((v) => (
-          <Text key={v.id}>{v.id}</Text>
-        ))}
-      </View>
-      {/* <Text>Result: {result}</Text> */}
-    </View>
+    <SafeAreaView style={styles.flex}>
+      <ScrollView
+        style={styles.flex}
+        contentContainerStyle={styles.container}
+        keyboardDismissMode="interactive"
+      >
+        <Text style={styles.title}>{`Model`}</Text>
+        <Text style={styles.modelTitle}>{model.id}</Text>
+        <ProgressBar progress={progress} />
+        <Text style={styles.title}>Prompt</Text>
+        <TextInput
+          value={prompt}
+          onChangeText={setPrompt}
+          placeholder="Enter a prompt"
+          placeholderTextColor={'#f0f0f0'}
+          style={styles.textInput}
+          multiline
+        />
+        <Text style={styles.title}>{`StepCount: ${stepCount}`}</Text>
+        <Slider
+          style={styles.slider}
+          minimumValue={0}
+          value={stepCount}
+          onValueChange={setStepCount}
+          maximumValue={150}
+          step={1}
+          minimumTrackTintColor="#FFFFFF"
+          maximumTrackTintColor="#000000"
+        />
+        <Text style={styles.title}>{`Seed: ${seed}`}</Text>
+        <Slider
+          style={styles.slider}
+          value={seed}
+          onValueChange={setSeed}
+          step={1}
+          minimumValue={-1}
+          maximumValue={1000}
+          minimumTrackTintColor="#FFFFFF"
+          maximumTrackTintColor="#000000"
+        />
+        <Text style={styles.title}>{`Image Generate Progress`}</Text>
+        <ProgressBar progress={generateProgress} />
+        {!!generatedImage && (
+          <Image
+            style={{ width, height: width, marginTop: 32 }}
+            source={{
+              uri: generatedImage,
+            }}
+          />
+        )}
+      </ScrollView>
+      <Button
+        title={modelLoaded ? 'Submit' : 'Downloading Model...'}
+        disabled={!modelLoaded}
+        onPress={submit}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  flex: {
     flex: 1,
+    backgroundColor: '#111111',
+  },
+  container: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
+    paddingHorizontal: 20,
   },
   box: {
     width: 60,
     height: 60,
     marginVertical: 20,
+  },
+  subTitle: {
+    fontSize: 14,
+    padding: 20,
+    color: '#f0f0f0',
+  },
+  title: {
+    fontSize: 20,
+    padding: 20,
+    color: '#f0f0f0',
+    textAlign: 'center',
+  },
+  modelTitle: {
+    fontSize: 15,
+    color: '#f0f0f0',
+    paddingBottom: 12,
+  },
+  textInput: {
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    minHeight: 140,
+    borderWidth: 1,
+    borderRadius: 20,
+    borderColor: '#f0f0f0',
+    color: '#f0f0f0',
+    width: '100%',
+    marginTop: 20,
+  },
+  slider: {
+    width: '100%',
+    height: 40,
   },
 });

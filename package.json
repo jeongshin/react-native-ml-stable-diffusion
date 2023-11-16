@@ -126,6 +126,7 @@
     ],
     "rules": {
       "no-unused-vars": "warn",
+      "react-native/no-inline-styles": "off",
       "prettier/prettier": [
         "error",
         {
